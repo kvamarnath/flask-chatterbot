@@ -1,6 +1,7 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from chatterbot import ChatBot
 from chatterbot.trainers import ChatterBotCorpusTrainer
+
 
 app = Flask(__name__)
 
@@ -8,9 +9,18 @@ english_bot = ChatBot("English Bot")
 english_bot.set_trainer(ChatterBotCorpusTrainer)
 english_bot.train("chatterbot.corpus.english")
 
+
 @app.route("/")
 def home():
     return render_template("index.html")
+
+
+@app.route('/api/v1', methods=['POST'])
+def make_reply():
+    query = request.form['query']
+    reply = str(english_bot.get_response(query))
+    return render_template('index.html', query=query, reply=reply)
+
 
 @app.route("/get/<string:query>")
 def get_raw_response(query):
